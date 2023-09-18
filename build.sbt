@@ -1,6 +1,6 @@
 name := "kojo-ai"
 
-version := "0.1.0"
+version := "0.6.0"
 
 scalaVersion := "2.13.6"
 
@@ -30,10 +30,13 @@ libraryDependencies ++= Seq(
   "ai.djl" % "basicdataset" % djlVersion,
   "ai.djl" % "model-zoo" % djlVersion,
   "ai.djl.pytorch" % "pytorch-model-zoo" % djlVersion,
+  "ai.djl.pytorch" % "pytorch-native-cpu" % "2.0.1" % Runtime classifier platform,
+  "ai.djl.pytorch" % "pytorch-jni" % s"2.0.1-$djlVersion" % Runtime,
   "ai.djl.tensorflow" % "tensorflow-model-zoo" % djlVersion,
+  "ai.djl.tensorflow" % "tensorflow-native-cpu" % "2.7.4" % Runtime classifier platform,
   "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.18.0",
   "commons-cli" % "commons-cli" % "1.5.0",
-  "org.knowm.xchart" % "xchart" % "3.7.0",
+  "org.knowm.xchart" % "xchart" % "3.8.5",
   "org.apache.commons" % "commons-math3" % "3.6.1",
   "org.bytedeco" % "javacpp" % javacppVersion,
   "org.bytedeco" % "javacpp" % javacppVersion classifier platform,
@@ -59,4 +62,3 @@ lazy val dist = project
       IO.copy(`mappings src->dest`)
     }
   )
-

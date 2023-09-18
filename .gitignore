@@ -14,7 +14,7 @@ target/
 *.*~
 /bin/
 .idea/
-dist/
+dist*/
 Kojo.zip
 log
 libk.dist/
