@@ -1,8 +1,6 @@
 // scroll down to the bottom of the file
 // for code to play with
 
-System.setProperty("ai.djl.default_engine", "PyTorch")
-
 cleari()
 clearOutput()
 
@@ -11,9 +9,6 @@ import java.awt.image.BufferedImage
 import java.util.HashMap
 
 import scala.util.Using
-
-import org.tensorflow.types.TFloat32
-import org.tensorflow.{ SavedModelBundle, Tensor }
 
 import org.bytedeco.javacv._
 import org.bytedeco.opencv.global.opencv_core.CV_32F
@@ -37,7 +32,7 @@ val meanVal = new Scalar(104.0, 177.0, 123.0, 128)
 
 val markerColor = new Scalar(0, 255, 255, 0)
 
-val facenet = "/home/lalit/.djl.ai/cache/repo/model/undefined/ai/djl/localmodelzoo/b1ad306b64bfb4e63823b0ce268f9c7d1e7c48c0/"
+val facenet = s"$scriptDir/face_feature_model"
 
 require(
     fdModelConfiguration.exists(),
@@ -61,10 +56,9 @@ val (faceModel, facePredictor) = {
     import java.nio.file.Paths
     val criteria =
         Criteria.builder()
-            .setTypes(classOf[Image], classOf[Array[Float]]) // defines input and output data type
+            .setTypes(classOf[Image], classOf[Array[Float]]) 
             .optTranslator(new FaceFeatureTranslator())
-            .optModelPath(Paths.get(facenet)) // search models in specified path
-            .optModelName("face_feature") // specify model file prefix
+            .optModelPath(Paths.get(facenet)) 
             .build()
 
     val mdl = criteria.loadModel()

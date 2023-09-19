@@ -15,7 +15,9 @@ target/
 /bin/
 .idea/
 dist*/
+release*/
 Kojo.zip
 log
 libk.dist/
 .bsp/
+examples/face-id/face_feature_model/*
