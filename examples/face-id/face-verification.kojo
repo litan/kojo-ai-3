@@ -21,6 +21,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs.imread
 
 import net.kogics.kojo.util.Utils
 
+// stuff for the face detection net
 val scriptDir = Utils.kojoCtx.baseDir
 val fdConfidenceThreshold = 0.5
 val fdModelConfiguration = new File(s"$scriptDir/face_detection_model/deploy.prototxt")
@@ -29,10 +30,11 @@ val inWidth = 300
 val inHeight = 300
 val inScaleFactor = 1.0
 val meanVal = new Scalar(104.0, 177.0, 123.0, 128)
-
 val markerColor = new Scalar(0, 255, 255, 0)
 
-val facenet = s"$scriptDir/face_feature_model"
+// stuff for the face feature net
+val facenetDir = s"$scriptDir/face_feature_model"
+val faceSize = 160
 
 require(
     fdModelConfiguration.exists(),
@@ -43,13 +45,14 @@ require(
     s"Cannot find FD model file: ${fdModelBinary.getCanonicalPath}")
 
 require(
-    new File(facenet).exists,
-    s"Cannot find face model dir: ${facenet}")
+    new File(facenetDir).exists,
+    s"Cannot find face model dir: ${facenetDir}")
 
-val faceDetectionNet = readNetFromCaffe(fdModelConfiguration.getCanonicalPath, fdModelBinary.getCanonicalPath)
 
-val (faceModel, facePredictor) = {
-    println("Loading face model")
+val faceDetectionModel = readNetFromCaffe(fdModelConfiguration.getCanonicalPath, fdModelBinary.getCanonicalPath)
+
+val (faceFeatureModel, faceFeaturePredictor) = {
+    println("Loading 'face feature extraction' model...")
     import ai.djl.repository.zoo.Criteria
     import ai.djl.examples.inference.face.FaceFeatureTranslator
     import ai.djl.modality.cv.Image
@@ -58,7 +61,7 @@ val (faceModel, facePredictor) = {
         Criteria.builder()
             .setTypes(classOf[Image], classOf[Array[Float]]) 
             .optTranslator(new FaceFeatureTranslator())
-            .optModelPath(Paths.get(facenet)) 
+            .optModelPath(Paths.get(facenetDir)) 
             .build()
 
     val mdl = criteria.loadModel()
@@ -120,10 +123,10 @@ def locateAndMarkFaces(image: Mat): Seq[Rect] = {
         image, inScaleFactor, new Size(inWidth, inHeight), meanVal, false, false, CV_32F)
 
     // Set the network input
-    faceDetectionNet.setInput(inputBlob)
+    faceDetectionModel.setInput(inputBlob)
 
     // Make forward pass, compute output
-    val detections = faceDetectionNet.forward()
+    val detections = faceDetectionModel.forward()
 
     // Decode detected face locations
     val di = detections.createIndexer().asInstanceOf[FloatIndexer]
@@ -158,7 +161,7 @@ def faceEmbedding(image: Mat): Array[Float] = {
         val src = Java2DFrameUtils.toBufferedImage(image)
         val faceImage = new BufferedImageFactory().fromImage(src)
         println(s"Feeding into net, img(${faceImage.getWidth}, ${faceImage.getHeight})")
-        val ret = facePredictor.predict(faceImage)
+        val ret = faceFeaturePredictor.predict(faceImage)
         println("Done")
         ret
     }.get
@@ -166,16 +169,15 @@ def faceEmbedding(image: Mat): Array[Float] = {
 
 def extractAndResizeFace(imageMat: Mat, rect: Rect): Mat = {
     val faceMat = new Mat(imageMat, rect)
-    resize(faceMat, faceMat, new Size(224, 224))
+    resize(faceMat, faceMat, new Size(faceSize, faceSize))
     faceMat
 }
 
 def scriptDone() {
-    println("Closing Nets...")
-    //    vggfaceNet.close()
-    facePredictor.close()
-    faceModel.close()
-    faceDetectionNet.close()
+    println("Closing Models...")
+    faceFeaturePredictor.close()
+    faceFeatureModel.close()
+    faceDetectionModel.close()
 }
 
 val btnWidth = 100
