@@ -1,18 +1,49 @@
 package net.kogics.kojo
 import java.awt.image.BufferedImage
+import java.nio.file.Paths
+import java.util.concurrent.ConcurrentHashMap
 
 import ai.djl.modality.cv.BufferedImageFactory
 import ai.djl.ndarray._
 import ai.djl.ndarray.types._
+import ai.djl.repository.zoo.Criteria
+import ai.djl.repository.zoo.ZooModel
 import ai.djl.translate._
 
 package object nst {
-
   case class NstInputData(
       content: BufferedImage,
       style: BufferedImage,
       alpha: Float
   )
+
+  type Input = NstInputData
+  type Output = BufferedImage
+  private val nstModelCache = nn.modelCache.asInstanceOf[ConcurrentHashMap[String, ZooModel[Input, Output]]]
+
+  def cachedModel(modelDir: String, engine: String): ZooModel[Input, Output] = {
+    val cacheKey = s"${modelDir}_$engine"
+    val translator = engine match {
+      case "PyTorch"    => new PyTorchNstTranslator()
+      case "TensorFlow" => new TfNstTranslator()
+    }
+    var model = nstModelCache.get(cacheKey)
+    if (model == null) {
+      val criteria =
+        Criteria
+          .builder()
+          .setTypes(classOf[Input], classOf[Output])
+          .optEngine(engine)
+          .optTranslator(translator)
+          .optModelPath(Paths.get(modelDir))
+          .build()
+
+      model = criteria.loadModel()
+      println(s"Caching model: $cacheKey")
+      nstModelCache.put(cacheKey, model)
+    }
+    model
+  }
 
   def imageToNDArray(image: BufferedImage, nd: NDManager): NDArray = {
     val djlImage = new BufferedImageFactory().fromImage(image)
