@@ -48,20 +48,42 @@ require(
     new File(facenetDir).exists,
     s"Cannot find face model dir: ${facenetDir}")
 
-
 val faceDetectionModel = readNetFromCaffe(fdModelConfiguration.getCanonicalPath, fdModelBinary.getCanonicalPath)
+
+import ai.djl.translate._
+import ai.djl.ndarray._
+import ai.djl.modality.cv.Image
+import ai.djl.modality.cv.transform._
+class FeatureModelTranslator extends Translator[Image, Array[Float]] {
+    def processInput(ctx: TranslatorContext, input: Image): NDList = {
+        val array = input.toNDArray(ctx.getNDManager)
+        val pipeline = new Pipeline()
+        pipeline
+            .add(new ToTensor())
+            .add(
+                new Normalize(
+                    Array(127.5f / 255.0f, 127.5f / 255.0f, 127.5f / 255.0f),
+                    Array(128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f)
+                )
+            )
+        pipeline.transform(new NDList(array))
+    }
+
+    def processOutput(ctx: TranslatorContext, list: NDList): Array[Float] = {
+        list.singletonOrThrow().toFloatArray
+    }
+}
 
 val (faceFeatureModel, faceFeaturePredictor) = {
     println("Loading 'face feature extraction' model...")
     import ai.djl.repository.zoo.Criteria
-    import ai.djl.examples.inference.face.FaceFeatureTranslator
     import ai.djl.modality.cv.Image
     import java.nio.file.Paths
     val criteria =
         Criteria.builder()
-            .setTypes(classOf[Image], classOf[Array[Float]]) 
-            .optTranslator(new FaceFeatureTranslator())
-            .optModelPath(Paths.get(facenetDir)) 
+            .setTypes(classOf[Image], classOf[Array[Float]])
+            .optTranslator(new FeatureModelTranslator())
+            .optModelPath(Paths.get(facenetDir))
             .build()
 
     val mdl = criteria.loadModel()
@@ -151,7 +173,6 @@ def locateAndMarkFaces(image: Mat): Seq[Rect] = {
 }
 
 def faceEmbedding(image: Mat): Array[Float] = {
-    import ai.djl.examples.inference.face.FeatureExtraction
     import ai.djl.modality.cv.BufferedImageFactory
     import ai.djl.pytorch.jni.JniUtils
 
@@ -222,8 +243,17 @@ val fps = 5
 var learnedEmbedding: Array[Float] = _
 
 def distance(a: Array[Float], b: Array[Float]): Float = {
-    import ai.djl.examples.inference.face.FeatureComparison
-    FeatureComparison.calculSimilar(a, b)
+    var ret = 0.0
+    var mod1 = 0.0
+    var mod2 = 0.0
+    val length = a.length;
+    for (i <- 0 until length) {
+        ret += a(i) * b(i)
+        mod1 += a(i) * a(i)
+        mod2 += b(i) * b(i)
+    }
+
+    ((ret / math.sqrt(mod1) / math.sqrt(mod2) + 1) / 2.0).toFloat
 }
 
 def checkFace(imageMat: Mat, faces: Seq[Rect]): Boolean = {
