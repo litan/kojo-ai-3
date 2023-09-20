@@ -30,7 +30,7 @@ Using.Manager { use =>
     val yPreds = model.predict(xDataf)
     val yPreds0 = yNormalizer.inverseTransform(yPreds.map(_.toDouble))
     addLineToChart(chart, Some("model"), xData0, yPreds0)
-    drawChart(chart)
+    updateChart(chart)
 }.get
 
 class NonlinearModel extends AutoCloseable {

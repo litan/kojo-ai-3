@@ -21,7 +21,7 @@ Using.Manager { use =>
     model.train(xDataf, yDataf)
     val yPreds = model.predict(xDataf).map(_.toDouble)
     addLineToChart(chart, Some("model"), xData, yPreds)
-    drawChart(chart)
+    updateChart(chart)
 }.get
 
 class Model extends AutoCloseable {
