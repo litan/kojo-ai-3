@@ -28,7 +28,7 @@ package object plot {
       .title(title)
       .xAxisTitle(xtitle)
       .yAxisTitle(ytitle)
-      .theme(ChartTheme.GGPlot2)
+      .theme(ChartTheme.XChart)
       .build()
     chart.getStyler.setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Scatter)
     chart.getStyler.setChartTitleVisible(true)
