@@ -72,8 +72,13 @@ class MnistModel extends AutoCloseable {
         l2a.matMul(w3).add(b3)
     }
 
+    val numEpochs = 20
+
     def train(): Unit = {
-        for (epoch <- 1 to 20) {
+        val lossChart = new LiveChart(
+            "Loss Plot", "epoch", "loss", 0, numEpochs, 0, 0.6
+        )
+        for (epoch <- 1 to numEpochs) {
             var eloss = 0f
             trainingSet.getData(nd).asScala.foreach { batch0 =>
                 Using.Manager { use =>
@@ -94,6 +99,7 @@ class MnistModel extends AutoCloseable {
                 }
             }
             println(s"[$epoch] Loss -- $eloss")
+            lossChart.update(epoch, eloss)
         }
         println("Training Done")
     }

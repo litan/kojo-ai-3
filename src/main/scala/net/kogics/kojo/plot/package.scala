@@ -35,8 +35,6 @@ package object plot {
     chart.getStyler.setAxisTitlesVisible(true)
     chart.getStyler.setXAxisDecimalPattern("0.0")
     chart.getStyler.setYAxisDecimalPattern("0.0")
-    chart.getStyler.setXAxisMin(0)
-    chart.getStyler.setYAxisMin(0)
     chart
   }
 
