@@ -27,5 +27,5 @@ val out = picColCentered(
     pic,
     Picture.vgap(gap),
     picRowCentered(content, Picture.hgap(gap), Picture.image(styleImage))
-).withScaling(0.75)
+).withScaling(0.6)
 drawCentered(out)
