@@ -15,6 +15,8 @@ We will gradually have more and more documentation and learning material, but fo
 * [Neural Style Transfer](examples/style-transfer-art/imgToimg.kojo)
 * [Face Verification](examples/face-id/face-verification.kojo)
 
+You can check out [screenshots](examples/screenshot) of the above examples in action.
+
 ### Getting Started
 To start using Kojo-AI within Kojo, just [use a published release](https://github.com/litan/kojo-ai-3/releases).
 
