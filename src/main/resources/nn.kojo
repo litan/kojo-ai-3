@@ -11,6 +11,7 @@ import ai.djl.training.loss.SoftmaxCrossEntropyLoss
 import ai.djl.training.util.ProgressBar
 
 import net.kogics.kojo.preprocess.StandardScaler
+import net.kogics.kojo.nn._
 
 Engine.getInstance
 JniUtils.setGradMode(false)

@@ -54,7 +54,7 @@ class Model extends AutoCloseable {
 
             params.foreach { p =>
                 p.subi(p.getGradient.mul(LEARNING_RATE))
-                JniUtils.zeroGrad(p.asInstanceOf[ai.djl.pytorch.engine.PtNDArray])
+                p.zeroGradients()
             }
         }
         println("Training Done")

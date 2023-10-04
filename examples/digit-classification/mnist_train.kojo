@@ -95,7 +95,7 @@ class MnistModel extends AutoCloseable {
 
                 params.foreach { p =>
                     p.subi(p.getGradient.mul(learningRate(epoch)))
-                    JniUtils.zeroGrad(p.asInstanceOf[ai.djl.pytorch.engine.PtNDArray])
+                    p.zeroGradients()
                 }
             }
             println(s"[$epoch] Loss -- $eloss")

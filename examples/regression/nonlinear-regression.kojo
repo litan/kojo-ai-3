@@ -58,14 +58,6 @@ class NonlinearModel extends AutoCloseable {
         Engine.getInstance.newGradientCollector()
     }
 
-    def updateParam(param: NDArray, grad: NDArray, lr: Float) {
-        // conceptually similar to
-        // param.subi(grad.mul(lr))
-        val inputs = new NDList(param, grad)
-        val weights = new NDList(param)
-        param.getNDArrayInternal.sgdUpdate(inputs, weights, lr, 0f, 1f, -1f, 0, true)
-    }
-
     def modelFunction(x: NDArray): NDArray = {
         val l1 = x.matMul(w1).add(b1)
         val l1a = Activation.relu(l1)
@@ -88,7 +80,8 @@ class NonlinearModel extends AutoCloseable {
             }.get
 
             params.foreach { p =>
-                updateParam(p, p.getGradient, LEARNING_RATE)
+                p.subi(p.getGradient.mul(LEARNING_RATE))
+                p.zeroGradients()
             }
         }
         println("Training Done")
