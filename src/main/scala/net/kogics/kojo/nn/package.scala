@@ -44,7 +44,7 @@ package object nn {
     f.get(cls).asInstanceOf[AtomicBoolean].set(false)
   }
 
-  def debugDump(ndManager: NDManager, level: Int): Unit = {
+  def ndDebugDump(ndManager: NDManager, level: Int): Unit = {
     ndManager.asInstanceOf[BaseNDManager].debugDump(level)
   }
 
