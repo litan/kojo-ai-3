@@ -16,3 +16,4 @@ import net.kogics.kojo.nn._
 Engine.getInstance
 JniUtils.setGradMode(false)
 JniUtils.setGraphExecutorOptimize(false)
+resetGradientCollection()

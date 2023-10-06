@@ -16,20 +16,20 @@ drawChart(chart)
 val xDataf = xData.map(_.toFloat)
 val yDataf = yData.map(_.toFloat)
 
-Using.Manager { use =>
+ndScoped { use =>
     val model = use(new Model)
     model.train(xDataf, yDataf)
     val yPreds = model.predict(xDataf).map(_.toDouble)
     addLineToChart(chart, Some("model"), xData, yPreds)
     updateChart(chart)
-}.get
+}
 
 class Model extends AutoCloseable {
     val LEARNING_RATE: Float = 0.005f
-    val nd = NDManager.newBaseManager()
+    val nm = ndMaker
 
-    val w = nd.create(1f).reshape(new Shape(1, 1))
-    val b = nd.create(0f).reshape(new Shape(1))
+    val w = nm.create(1f).reshape(new Shape(1, 1))
+    val b = nm.create(0f).reshape(new Shape(1))
 
     val params = new NDList(w, b).asScala
 
@@ -37,35 +37,36 @@ class Model extends AutoCloseable {
         p.setRequiresGradient(true)
     }
 
-    def newGradientCollector = {
-        Engine.getInstance.newGradientCollector()
-    }
-
     def train(xValues: Array[Float], yValues: Array[Float]): Unit = {
-        val x = nd.create(xValues).reshape(new Shape(-1, 1))
-        val y = nd.create(yValues).reshape(new Shape(-1, 1))
+        val x = nm.create(xValues).reshape(new Shape(-1, 1))
+        val y = nm.create(yValues).reshape(new Shape(-1, 1))
         for (epoch <- 1 to 10) {
-            Using.Manager { use =>
-                val gc = use(newGradientCollector)
-                val yPred = use(x matMul w add b)
-                val loss = use(yPred.sub(y).pow(2).mean())
+            ndScoped { use =>
+                val gc = use(gradientCollector)
+                val yPred = x matMul w add b
+                val loss = yPred.sub(y).pow(2).mean()
                 gc.backward(loss)
-            }.get // force an exception if there was a problem
+            }
 
-            params.foreach { p =>
-                p.subi(p.getGradient.mul(LEARNING_RATE))
-                p.zeroGradients()
+            ndScoped { _ =>
+                params.foreach { p =>
+                    p.subi(p.getGradient.mul(LEARNING_RATE))
+                    p.zeroGradients()
+                }
             }
         }
+        x.close(); y.close()
         println("Training Done")
         println(w)
         println(b)
     }
 
     def predict(xValues: Array[Float]): Array[Float] = {
-        val x = nd.create(xValues).reshape(new Shape(-1, 1))
-        val y = x matMul w add b
-        y.toFloatArray
+        ndScoped { _ =>
+            val x = nm.create(xValues).reshape(new Shape(-1, 1))
+            val y = x matMul w add b
+            y.toFloatArray
+        }
     }
 
     def close() {
@@ -73,7 +74,7 @@ class Model extends AutoCloseable {
         params.foreach { p =>
             p.close()
         }
-        nd.close()
+        nm.close()
         println("Done")
     }
 }

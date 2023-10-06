@@ -24,38 +24,31 @@ drawChart(chart)
 val xDataf = xData.map(_.toFloat)
 val yDataf = yData.map(_.toFloat)
 
-Using.Manager { use =>
+ndScoped { use =>
     val model = use(new NonlinearModel)
     model.train(xDataf, yDataf)
     val yPreds = model.predict(xDataf)
     val yPreds0 = yNormalizer.inverseTransform(yPreds.map(_.toDouble))
     addLineToChart(chart, Some("model"), xData0, yPreds0)
     updateChart(chart)
-}.get
+}
 
 class NonlinearModel extends AutoCloseable {
     val LEARNING_RATE: Float = 0.1f
-    val nd = NDManager.newBaseManager()
-    nd.getManagedArrays.asScala.foreach { nda =>
-        println(s"initial array with shape - ${nda.getShape}")
-    }
+    val nm = NDManager.newBaseManager()
 
     val hidden = 50
 
-    val w1 = nd.randomNormal(0, 0.1f, new Shape(1, hidden), DataType.FLOAT32)
-    val b1 = nd.zeros(new Shape(hidden))
+    val w1 = nm.randomNormal(0, 0.1f, new Shape(1, hidden), DataType.FLOAT32)
+    val b1 = nm.zeros(new Shape(hidden))
 
-    val w2 = nd.randomNormal(0, 0.1f, new Shape(hidden, 1), DataType.FLOAT32)
-    val b2 = nd.zeros(new Shape(1))
+    val w2 = nm.randomNormal(0, 0.1f, new Shape(hidden, 1), DataType.FLOAT32)
+    val b2 = nm.zeros(new Shape(1))
 
     val params = new NDList(w1, b1, w2, b2).asScala
 
     params.foreach { p =>
         p.setRequiresGradient(true)
-    }
-
-    def newGradientCollector = {
-        Engine.getInstance.newGradientCollector()
     }
 
     def modelFunction(x: NDArray): NDArray = {
@@ -65,38 +58,42 @@ class NonlinearModel extends AutoCloseable {
     }
 
     def train(xValues: Array[Float], yValues: Array[Float]): Unit = {
-        val x = nd.create(xValues).reshape(new Shape(-1, 1))
-        val y = nd.create(yValues).reshape(new Shape(-1, 1))
+        val x = nm.create(xValues).reshape(new Shape(-1, 1))
+        val y = nm.create(yValues).reshape(new Shape(-1, 1))
         for (epoch <- 1 to 500) {
-            Using.Manager { use =>
-                val gc = use(newGradientCollector)
-                //                    gc.zeroGradients()
-                val yPred = use(modelFunction(x))
-                val loss = use(y.sub(yPred).square().mean())
+            ndScoped { use =>
+                val gc = use(gradientCollector)
+                val yPred = modelFunction(x)
+                val loss = y.sub(yPred).square().mean()
                 if (epoch % 50 == 0) {
                     println(s"Loss -- ${loss.getFloat()}")
                 }
                 gc.backward(loss)
-            }.get
+            }
 
-            params.foreach { p =>
-                p.subi(p.getGradient.mul(LEARNING_RATE))
-                p.zeroGradients()
+            ndScoped { _ =>
+                params.foreach { p =>
+                    p.subi(p.getGradient.mul(LEARNING_RATE))
+                    p.zeroGradients()
+                }
             }
         }
+        x.close(); y.close()
         println("Training Done")
     }
 
     def predict(xValues: Array[Float]): Array[Float] = {
-        val x = nd.create(xValues).reshape(new Shape(-1, 1))
-        val y = modelFunction(x)
-        y.toFloatArray
+        ndScoped { _ =>
+            val x = nm.create(xValues).reshape(new Shape(-1, 1))
+            val y = modelFunction(x)
+            y.toFloatArray
+        }
     }
 
     def close() {
         println("Closing remaining ndarrays...")
         params.foreach(_.close())
-        nd.close()
+        nm.close()
         println("Done")
     }
 }
