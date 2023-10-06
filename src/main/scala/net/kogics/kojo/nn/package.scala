@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import scala.util.Using
 
+import ai.djl.ndarray.types.Shape
 import ai.djl.ndarray.BaseNDManager
 import ai.djl.ndarray.NDArray
 import ai.djl.ndarray.NDManager
@@ -38,15 +39,22 @@ package object nn {
   }
 
   def resetGradientCollection(): Unit = {
-    val cls = classOf[PtGradientCollector]
-    val f = cls.getDeclaredField("isCollecting")
-    f.setAccessible(true)
-    f.get(cls).asInstanceOf[AtomicBoolean].set(false)
+    try {
+      val cls = classOf[PtGradientCollector]
+      val f = cls.getDeclaredField("isCollecting")
+      f.setAccessible(true)
+      f.get(cls).asInstanceOf[AtomicBoolean].set(false)
+    }
+    catch {
+      case _: Throwable =>
+    }
   }
 
   def ndDebugDump(ndManager: NDManager, level: Int): Unit = {
     ndManager.asInstanceOf[BaseNDManager].debugDump(level)
   }
+
+  def shape(parts: Long*): Shape = new Shape(parts: _*)
 
   implicit class RichNDArray(nda: NDArray) {
     // +, -, *, /, **

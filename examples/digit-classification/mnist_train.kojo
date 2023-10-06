@@ -41,14 +41,14 @@ class MnistModel extends AutoCloseable {
     val hidden1 = 38
     val hidden2 = 12
 
-    val w1 = nm.randomNormal(0, 0.1f, new Shape(784, hidden1), DataType.FLOAT32)
-    val b1 = nm.zeros(new Shape(hidden1))
+    val w1 = nm.randomNormal(0, 0.1f, shape(784, hidden1), DataType.FLOAT32)
+    val b1 = nm.zeros(shape(hidden1))
 
-    val w2 = nm.randomNormal(0, 0.1f, new Shape(hidden1, hidden2), DataType.FLOAT32)
-    val b2 = nm.zeros(new Shape(hidden2))
+    val w2 = nm.randomNormal(0, 0.1f, shape(hidden1, hidden2), DataType.FLOAT32)
+    val b2 = nm.zeros(shape(hidden2))
 
-    val w3 = nm.randomNormal(0, 0.1f, new Shape(hidden2, 10), DataType.FLOAT32)
-    val b3 = nm.zeros(new Shape(10))
+    val w3 = nm.randomNormal(0, 0.1f, shape(hidden2, 10), DataType.FLOAT32)
+    val b3 = nm.zeros(shape(10))
 
     val params = new NDList(w1, b1, w2, b2, w3, b3).asScala
 
@@ -81,7 +81,7 @@ class MnistModel extends AutoCloseable {
                     val batch = use(batch0)
                     val gc = use(gradientCollector)
                     //                        gc.zeroGradients()
-                    val x = batch.getData.head.reshape(new Shape(-1, 784))
+                    val x = batch.getData.head.reshape(shape(-1, 784))
                     val y = batch.getLabels.head
                     val yPred = use(modelFunction(x))
                     val loss = use(softmax.evaluate(new NDList(y), new NDList(yPred)))
@@ -109,7 +109,7 @@ class MnistModel extends AutoCloseable {
         validateSet.getData(nm).asScala.foreach { batch0 =>
             ndScoped { use =>
                 val batch = use(batch0)
-                val x = batch.getData.head.reshape(new Shape(-1, 784))
+                val x = batch.getData.head.reshape(shape(-1, 784))
                 val y = batch.getLabels.head
                 val yPred = use(modelFunction(x).softmax(1).argMax(1))
                 val matches = use(y.toType(DataType.INT64, false).eq(yPred))
