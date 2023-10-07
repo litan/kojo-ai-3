@@ -3,7 +3,7 @@ import scala.jdk.CollectionConverters._
 
 import ai.djl.engine.Engine
 import ai.djl.ndarray._
-import ai.djl.ndarray.types._
+import ai.djl.ndarray.types.DataType
 import ai.djl.nn.Activation
 import ai.djl.pytorch.jni.JniUtils
 import ai.djl.training.dataset.Dataset

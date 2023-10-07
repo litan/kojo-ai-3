@@ -28,8 +28,8 @@ class Model extends AutoCloseable {
     val LEARNING_RATE: Float = 0.005f
     val nm = ndMaker
 
-    val w = nm.create(1f).reshape(shape(1, 1))
-    val b = nm.create(0f).reshape(shape(1))
+    val w = nm.create(1f).reshape(Shape(1, 1))
+    val b = nm.create(0f).reshape(Shape(1))
 
     val params = new NDList(w, b).asScala
 
@@ -38,8 +38,8 @@ class Model extends AutoCloseable {
     }
 
     def train(xValues: Array[Float], yValues: Array[Float]): Unit = {
-        val x = nm.create(xValues).reshape(shape(-1, 1))
-        val y = nm.create(yValues).reshape(shape(-1, 1))
+        val x = nm.create(xValues).reshape(Shape(-1, 1))
+        val y = nm.create(yValues).reshape(Shape(-1, 1))
         for (epoch <- 1 to 10) {
             ndScoped { use =>
                 val gc = use(gradientCollector)
@@ -63,7 +63,7 @@ class Model extends AutoCloseable {
 
     def predict(xValues: Array[Float]): Array[Float] = {
         ndScoped { _ =>
-            val x = nm.create(xValues).reshape(shape(-1, 1))
+            val x = nm.create(xValues).reshape(Shape(-1, 1))
             val y = x matMul w add b
             y.toFloatArray
         }

@@ -5,7 +5,6 @@ import java.util.concurrent.ConcurrentHashMap
 
 import scala.util.Using
 
-import ai.djl.ndarray.types.Shape
 import ai.djl.ndarray.BaseNDManager
 import ai.djl.ndarray.NDArray
 import ai.djl.ndarray.NDManager
@@ -54,7 +53,8 @@ package object nn {
     ndManager.asInstanceOf[BaseNDManager].debugDump(level)
   }
 
-  def shape(parts: Long*): Shape = new Shape(parts: _*)
+  type Shape = ai.djl.ndarray.types.Shape
+  def Shape(parts: Long*): Shape = new Shape(parts: _*)
 
   implicit class RichNDArray(nda: NDArray) {
     // +, -, *, /, **

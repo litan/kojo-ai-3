@@ -67,8 +67,8 @@ def imgGrayToNDArray(image: BufferedImage, nd: NDManager): NDArray = {
         }
     }
     imgBuffer.flip()
-    val shp = shape(1, image.getHeight * image.getWidth)
-    val t2 = nd.create(imgBuffer, shp)
+    val shape = Shape(1, image.getHeight * image.getWidth)
+    val t2 = nd.create(imgBuffer, shape)
     t2
 }
 

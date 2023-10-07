@@ -39,11 +39,11 @@ class NonlinearModel extends AutoCloseable {
 
     val hidden = 50
 
-    val w1 = nm.randomNormal(0, 0.1f, shape(1, hidden), DataType.FLOAT32)
-    val b1 = nm.zeros(shape(hidden))
+    val w1 = nm.randomNormal(0, 0.1f, Shape(1, hidden), DataType.FLOAT32)
+    val b1 = nm.zeros(Shape(hidden))
 
-    val w2 = nm.randomNormal(0, 0.1f, shape(hidden, 1), DataType.FLOAT32)
-    val b2 = nm.zeros(shape(1))
+    val w2 = nm.randomNormal(0, 0.1f, Shape(hidden, 1), DataType.FLOAT32)
+    val b2 = nm.zeros(Shape(1))
 
     val params = new NDList(w1, b1, w2, b2).asScala
 
@@ -58,8 +58,8 @@ class NonlinearModel extends AutoCloseable {
     }
 
     def train(xValues: Array[Float], yValues: Array[Float]): Unit = {
-        val x = nm.create(xValues).reshape(shape(-1, 1))
-        val y = nm.create(yValues).reshape(shape(-1, 1))
+        val x = nm.create(xValues).reshape(Shape(-1, 1))
+        val y = nm.create(yValues).reshape(Shape(-1, 1))
         for (epoch <- 1 to 500) {
             ndScoped { use =>
                 val gc = use(gradientCollector)
@@ -84,7 +84,7 @@ class NonlinearModel extends AutoCloseable {
 
     def predict(xValues: Array[Float]): Array[Float] = {
         ndScoped { _ =>
-            val x = nm.create(xValues).reshape(shape(-1, 1))
+            val x = nm.create(xValues).reshape(Shape(-1, 1))
             val y = modelFunction(x)
             y.toFloatArray
         }
