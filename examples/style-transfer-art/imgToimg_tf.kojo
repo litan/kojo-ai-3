@@ -5,7 +5,7 @@ clearOutput()
 setBackground(black)
 
 val baseDir = kojoCtx.baseDir
-val modelDir = s"$baseDir/nst_model_gh/"
+val modelDir = s"$baseDir/nst_model_tf/"
 val styleImage = s"$baseDir/style/ashville_cropped.jpg"
 val contentImage = s"$baseDir/content/cornell_cropped.jpg"
 
