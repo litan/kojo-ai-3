@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage
 
 import net.kogics.kojo.util.Utils
 
-class MnistModel {
+class MnistModel(modelFile: String) {
     val nd = NDManager.newBaseManager()
 
     val params = load(6)
@@ -81,7 +81,7 @@ require(
     new File(modelFile).exists,
     s"Cannot find MNIST model file: ${modelFile}")
 
-val mnistNet = new MnistModel()
+val mnistNet = new MnistModel(modelFile)
 
 def predict(inputTensor: NDArray): Int = {
     mnistNet.predict(inputTensor).toInt

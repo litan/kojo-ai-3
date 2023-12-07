@@ -3,6 +3,10 @@
 
 import ai.djl.basicdataset.cv.classification.Mnist
 
+val seed = 40
+initRandomGenerator(seed)
+Engine.getInstance.setRandomSeed(seed)
+
 cleari()
 clearOutput()
 
