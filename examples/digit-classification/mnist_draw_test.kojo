@@ -89,7 +89,7 @@ def imgBlueToGray(image: BufferedImage): BufferedImage = {
     val h = image.getHeight
     val w = image.getWidth
     val newImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
-    
+
     for (y <- 0 until h) {
         for (x <- 0 until w) {
             val pixel = image.getRGB(x, y)
@@ -123,7 +123,12 @@ def predictProbs(inputTensor: NDArray): Seq[(Int, String)] = {
 // drawing stuff
 
 def resultPic(digitImg: BufferedImage, probs: Array[Float]): Picture = {
-    val pics = ArrayBuffer[Picture](Picture.image(digitImg), Picture.vgap(10))
+    val netInput = picRowCentered(
+        Picture.text("Net Input: ").withPenColor(cm.darkBlue),
+        Picture.hgap(5),
+        Picture.image(digitImg)
+    )
+    val pics = ArrayBuffer[Picture](netInput, Picture.vgap(10))
     probs.zipWithIndex.foreach { case (p, idx) =>
         val pic = picRowCentered(
             Picture.text(idx).withPenColor(black),
