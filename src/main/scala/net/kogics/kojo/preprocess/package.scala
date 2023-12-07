@@ -57,4 +57,10 @@ package object preprocess {
       data.map(_ * absMax)
     }
   }
+
+  class NoOpScaler extends Scaler {
+    def fit(data: Array[Double]): Unit = {}
+    def transform(data: Array[Double]): Array[Double] = data
+    def inverseTransform(data: Array[Double]): Array[Double] = data
+  }
 }
