@@ -88,13 +88,15 @@ def predict(inputTensor: NDArray): Int = {
 }
 
 def makePredictionPic(filename: String, expected: Int): Picture = {
-    val inputImage = Utils.loadBufImage(filename)
-    val pic = Picture.image(inputImage)
-    val inputTensor = imgGrayToNDArray(inputImage, mnistNet.nd)
-    val prediction = predict(inputTensor)
-    val clr = if (prediction == expected) green else red
-    val pic2 = Picture.text(prediction, 30).withPenColor(clr)
-    picRowCentered(pic, Picture.hgap(20), pic2)
+    ndScoped { _ =>
+        val inputImage = Utils.loadBufImage(filename)
+        val pic = Picture.image(inputImage)
+        val inputTensor = imgGrayToNDArray(inputImage, mnistNet.nd)
+        val prediction = predict(inputTensor)
+        val clr = if (prediction == expected) green else red
+        val pic2 = Picture.text(prediction, 30).withPenColor(clr)
+        picRowCentered(pic, Picture.hgap(20), pic2)
+    }
 }
 
 val pics = for (i <- 0 to 9) yield {

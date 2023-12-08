@@ -2,6 +2,10 @@
 // Draw digits and see predictions
 // Draw in the whole red rectangular area for best results
 
+// Note -- this is not the ideal model for computer vision as it uses
+// only fully connected layers, and is thus not translation invariant
+// You can see this limitation by drawing 1 on the sides
+
 // #include /nn.kojo
 cleari()
 clearOutput()
@@ -183,21 +187,23 @@ def go() {
         pic.draw()
 
         if (state.isDrawing && !isMousePressed) {
-            val digitLargeImg = pic.toImage
-            val digitImg = new java.awt.image.BufferedImage(28, 28, java.awt.image.BufferedImage.TYPE_INT_RGB)
-            val g = digitImg.createGraphics
-            g.translate(0, 28)
-            g.scale(1, -1)
-            g.drawImage(digitLargeImg, 3, 3, 22, 22, null)
-            g.dispose()
+            ndScoped { _ =>
+                val digitLargeImg = pic.toImage
+                val digitImg = new java.awt.image.BufferedImage(28, 28, java.awt.image.BufferedImage.TYPE_INT_RGB)
+                val g = digitImg.createGraphics
+                g.translate(0, 28)
+                g.scale(1, -1)
+                g.drawImage(digitLargeImg, 3, 3, 22, 22, null)
+                g.dispose()
 
-            val digitNDArray = imgBlueToNDArray(digitImg, mnistNet.nd)
-            val prediction = predict(digitNDArray)
-            val predictionProbs = mnistNet.predictProbs(digitNDArray)
+                val digitNDArray = imgBlueToNDArray(digitImg, mnistNet.nd)
+                val prediction = predict(digitNDArray)
+                val predictionProbs = mnistNet.predictProbs(digitNDArray)
 
-            stopAnimation()
-            val digitImgActual = imgBlueToGray(digitImg)
-            draw(resultPic(digitImgActual, predictionProbs).withTranslation(200, -150))
+                stopAnimation()
+                val digitImgActual = imgBlueToGray(digitImg)
+                draw(resultPic(digitImgActual, predictionProbs).withTranslation(200, -150))
+            }
         }
 
         draw(Picture.widget(clearBtn).withPosition(-36, -150))

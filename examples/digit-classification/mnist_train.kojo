@@ -75,6 +75,7 @@ class MnistModel extends AutoCloseable {
     val numEpochs = 20
 
     def train(): Unit = {
+        println("Training Started...")
         val lossChart = new LiveChart(
             "Loss Plot", "epoch", "loss", 0, numEpochs, 0, 1
         )
@@ -83,17 +84,15 @@ class MnistModel extends AutoCloseable {
             trainingSet.getData(nm).asScala.foreach { batch0 =>
                 ndScoped { use =>
                     val batch = use(batch0)
-                    val gc = use(gradientCollector)
-                    //                        gc.zeroGradients()
+                    val gc = gradientCollector
                     val x = batch.getData.head.reshape(Shape(-1, 784))
                     val y = batch.getLabels.head
                     val yPred = use(modelFunction(x))
                     val loss = use(softmax.evaluate(new NDList(y), new NDList(yPred)))
                     eloss = loss.getFloat()
                     gc.backward(loss)
-                }
+                    gc.close()
 
-                ndScoped { _ =>
                     params.foreach { p =>
                         p.subi(p.getGradient.mul(learningRate(epoch)))
                         p.zeroGradients()
