@@ -2,9 +2,12 @@
 // Draw digits and see predictions
 // Draw in the whole red rectangular area for best results
 
+// This "app" uses the model trained via mnist_train.kojo
+
 // Note -- this is not the ideal model for computer vision as it uses
 // only fully connected layers, and is thus not translation invariant
 // You can see this limitation by drawing 1 on the sides
+
 
 // #include /nn.kojo
 cleari()
