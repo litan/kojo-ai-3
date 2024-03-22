@@ -1,8 +1,9 @@
+lazy val scalaVer = "2.13.6"
 name := "kojo-ai"
 
-version := "0.6.1"
+version := "0.7.0"
 
-scalaVersion := "2.13.6"
+scalaVersion := scalaVer
 
 scalacOptions := Seq("-feature", "-deprecation")
 
@@ -37,6 +38,8 @@ libraryDependencies ++= Seq(
   "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.18.0",
   "commons-cli" % "commons-cli" % "1.5.0",
   "org.knowm.xchart" % "xchart" % "3.8.5",
+  "org.scala-lang" % "scala-reflect" % scalaVer,
+  "tech.tablesaw" % "tablesaw-core" % "0.43.1",
   "org.apache.commons" % "commons-math3" % "3.6.1",
   "org.bytedeco" % "javacpp" % javacppVersion,
   "org.bytedeco" % "javacpp" % javacppVersion classifier platform,

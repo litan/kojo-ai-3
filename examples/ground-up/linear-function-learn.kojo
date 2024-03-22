@@ -27,7 +27,7 @@ val nepochs = 500
 
 ndScoped { use =>
     val model = use(new Model)
-//    updateGraph(model, 0)
+    //    updateGraph(model, 0)
     model.train(xDataf, yDataf)
     updateGraph(model, nepochs)
 }
@@ -59,24 +59,24 @@ class Model extends AutoCloseable {
     }
 
     def train(xValues: Array[Float], yValues: Array[Float]): Unit = {
-        val x = nm.create(xValues).reshape(Shape(-1, 1))
-        val y = nm.create(yValues).reshape(Shape(-1, 1))
-        for (epoch <- 1 to 1000) {
-            ndScoped { use =>
-                val gc = use(gradientCollector)
-                val yPred = modelFunction(x)
-                val loss = y.sub(yPred).square().mean()
-                gc.backward(loss)
-            }
+        ndScoped { _ =>
+            val x = nm.create(xValues).reshape(Shape(-1, 1))
+            val y = nm.create(yValues).reshape(Shape(-1, 1))
+            for (epoch <- 1 to 1000) {
+                ndScoped { _ =>
+                    val gc = gradientCollector
+                    val yPred = modelFunction(x)
+                    val loss = y.sub(yPred).square().mean()
+                    gc.backward(loss)
+                    gc.close()
 
-            ndScoped { _ =>
-                params.foreach { p =>
-                    p.subi(p.getGradient.mul(LEARNING_RATE))
-                    p.zeroGradients()
+                    params.foreach { p =>
+                        p.subi(p.getGradient.mul(LEARNING_RATE))
+                        p.zeroGradients()
+                    }
                 }
             }
         }
-        x.close(); y.close()
         println("Training Done")
         println(w)
         println(b)
