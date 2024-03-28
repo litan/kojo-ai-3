@@ -4,8 +4,11 @@ This *extension* provides support for machine learning and AI within Kojo.
 
 This is the third iteration of Kojo-AI. We now have a solid foundation based on [DJL](https://djl.ai/), the *Deep Java Library*. DJL gives us good access to both Pytorch and Tensorflow (and other deep learning engines where needed). It supports very usable ND Tensors, training of arbitrarily complicated models, and fast inference. So our needs should be well covered for the foreseeable future!
 
-We will gradually have more and more documentation and learning material, but for now, to get a feel for how Kojo-AI works, take a look at the following examples:
+We will gradually have more and more documentation and learning material, but for now, to get a feel for how Kojo-AI works, take a look at the following:
 
+The [ai_fundamentals repo](https://github.com/litan/ai_fundamentals)
+
+Or the following examples in this repo:
 * [Tensors](examples/regression/tensors.kojo)
 * [Linear Regression](examples/regression/linear-regression.kojo)
 * [Non Linear Regression](examples/regression/nonlinear-regression.kojo)
