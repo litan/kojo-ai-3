@@ -54,6 +54,15 @@ package object dataframe {
     }
   }
 
+  implicit class RichNumericColumn[T <: Number](n: NumericColumn[T]) {
+    def asDoubleSeq = n.asDoubleArray()
+    def asIntSeq = asDoubleSeq.map(math.round(_).toInt)
+  }
+
+  implicit class RichStringColumn(s: StringColumn) {
+    def asStringSeq = s.asObjectArray()
+  }
+
   implicit class DataFrame(df: Table) {
     def length: Int = df.rowCount
     def head(n: Int = 5): Table = df.first(n)

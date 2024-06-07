@@ -28,13 +28,13 @@ package object plot {
       .title(title)
       .xAxisTitle(xtitle)
       .yAxisTitle(ytitle)
-      .theme(ChartTheme.XChart)
+      .theme(ChartTheme.Matlab)
       .build()
     chart.getStyler.setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Scatter)
     chart.getStyler.setChartTitleVisible(true)
     chart.getStyler.setAxisTitlesVisible(true)
-    chart.getStyler.setXAxisDecimalPattern("0.0")
-    chart.getStyler.setYAxisDecimalPattern("0.0")
+    chart.getStyler.setXAxisDecimalPattern("###.#")
+    chart.getStyler.setYAxisDecimalPattern("###.#")
     chart
   }
 
@@ -45,16 +45,26 @@ package object plot {
       .title(title)
       .xAxisTitle(xtitle)
       .yAxisTitle(ytitle)
-      .theme(ChartTheme.GGPlot2)
+      .theme(ChartTheme.Matlab)
       .build()
     chart.getStyler.setChartTitleVisible(true)
     chart.getStyler.setAxisTitlesVisible(true)
+    chart.getStyler.setXAxisDecimalPattern("###.#")
+    chart.getStyler.setYAxisDecimalPattern("###.#")
     chart
   }
 
   private def makePieChart(title: String): PieChart = {
-    val chart = new PieChartBuilder().width(800).height(600).title(title).theme(ChartTheme.GGPlot2).build()
+    val chart = new PieChartBuilder().width(800).height(600).title(title).theme(ChartTheme.Matlab).build()
     chart.getStyler.setChartTitleVisible(true)
+    chart.getStyler.setDecimalPattern("###.#")
+    chart
+  }
+
+  private def makeBoxPlot(title: String): BoxChart = {
+    val chart = new BoxChartBuilder().width(800).height(600).title(title).theme(ChartTheme.Matlab).build()
+    chart.getStyler.setChartTitleVisible(true)
+    chart.getStyler.setDecimalPattern("###.#")
     chart
   }
 
@@ -74,11 +84,11 @@ package object plot {
     }
   }
 
-  private def addCategorySeriesToChart[N <: Number](
+  private def addCategorySeriesToChart(
       chart: CategoryChart,
       name: Option[String],
       categories: Seq[String],
-      values: Seq[N]
+      values: Seq[Int]
   ): CategorySeries = {
     def asJavaList[A, B](xs: Seq[B]) = {
       import scala.jdk.CollectionConverters._
@@ -102,6 +112,11 @@ package object plot {
         chart.addSeries(cat, cnt)
     }
     chart
+  }
+
+  private def addBoxSeriesToChart(chart: BoxChart, name: String, data: Seq[Double]): BoxSeries = {
+    chart.getStyler.setLegendVisible(true)
+    chart.addSeries(name, data.toArray)
   }
 
   private def addHistogramSeriesToChart(
@@ -143,26 +158,32 @@ package object plot {
     chart
   }
 
-  def addBarsToChart[N <: Number](
+  def addBarsToChart(
       chart: CategoryChart,
       name: Option[String],
       categories: Seq[String],
-      values: Seq[N]
+      values: Seq[Int]
   ): CategoryChart = {
     val series = addCategorySeriesToChart(chart, name, categories, values)
-    //    series.setLineColor()
     chart
   }
 
   def addSlicesToChart(chart: PieChart, name: Option[String], categories: Seq[String], counts: Seq[Int]): PieChart = {
     val series = addPieSlicesToChart(chart, categories, counts)
-    //    series.setLineColor()
+    chart
+  }
+
+  def addBoxPlotToChart(
+      chart: BoxChart,
+      name: String,
+      data: Seq[Double]
+  ): BoxChart = {
+    val series = addBoxSeriesToChart(chart, name, data)
     chart
   }
 
   def addHistogramToChart(chart: CategoryChart, name: Option[String], xs: Array[Double], bins: Int): CategoryChart = {
     val series = addHistogramSeriesToChart(chart, name, xs, bins)
-    //    series.setLineColor()
     chart
   }
 
@@ -184,13 +205,17 @@ package object plot {
       counts: Seq[Int]
   ): CategoryChart = {
     val chart = makeCategoryChart(title, xtitle, ytitle)
-    val total = counts.sum
-    addBarsToChart(chart, None, categories, counts.map(e => java.lang.Double.valueOf(e * 100.0 / total)))
+    addBarsToChart(chart, None, categories, counts)
   }
 
   def pieChart(title: String, categories: Seq[String], counts: Seq[Int]): PieChart = {
     val chart = makePieChart(title)
     addPieSlicesToChart(chart, categories, counts)
+  }
+
+  def boxPlot(title: String, name: String, data: Seq[Double]): BoxChart = {
+    val chart = makeBoxPlot(title)
+    addBoxPlotToChart(chart, name, data)
   }
 
   def histogram(title: String, xtitle: String, ytitle: String, xs: Array[Double], bins: Int): CategoryChart = {
