@@ -57,6 +57,11 @@ package object dataframe {
   implicit class RichNumericColumn[T <: Number](n: NumericColumn[T]) {
     def asDoubleSeq = n.asDoubleArray()
     def asIntSeq = asDoubleSeq.map(math.round(_).toInt)
+    def correlation(other: NumericColumn[T]): Double = {
+      import org.apache.commons.math3.stat.correlation.PearsonsCorrelation
+      val corrFinder = new PearsonsCorrelation()
+      corrFinder.correlation(n.asDoubleArray(), other.asDoubleArray())
+    }
   }
 
   implicit class RichStringColumn(s: StringColumn) {
