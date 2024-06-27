@@ -55,8 +55,10 @@ package object plot {
   }
 
   private def makePieChart(title: String): PieChart = {
-    val chart = new PieChartBuilder().width(800).height(600).title(title).theme(ChartTheme.Matlab).build()
+    // use GGPlot theme to show both categories and percentages in chart
+    val chart = new PieChartBuilder().width(800).height(600).title(title).theme(ChartTheme.GGPlot2).build()
     chart.getStyler.setChartTitleVisible(true)
+    chart.getStyler.setLegendVisible(true)
     chart.getStyler.setDecimalPattern("###.#")
     chart
   }
@@ -106,7 +108,6 @@ package object plot {
   }
 
   private def addPieSlicesToChart(chart: PieChart, categories: Seq[String], counts: Seq[Int]): PieChart = {
-    chart.getStyler.setLegendVisible(true)
     categories.zip(counts).foreach {
       case (cat, cnt) =>
         chart.addSeries(cat, cnt)
