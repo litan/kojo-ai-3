@@ -200,6 +200,19 @@ return console.askOkCancel(message, true);
             <actions>
               <action id="516" beanClass="com.install4j.runtime.beans.actions.UninstallPreviousAction" actionElevationType="none" rollbackBarrierExitCode="0" />
               <action id="17" beanClass="com.install4j.runtime.beans.actions.InstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="quit" errorMessage="${i18n:FileCorrupted}" />
+              <action id="517" beanClass="com.install4j.runtime.beans.actions.files.DeleteFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="backupForRollback" type="boolean" value="false" />
+                  <property name="files" type="array" class="java.io.File" length="1">
+                    <element index="0">
+                      <object class="java.io.File">
+                        <string>${installer:sys.installationDir}/jre</string>
+                      </object>
+                    </element>
+                  </property>
+                  <property name="recursive" type="boolean" value="true" />
+                </serializedBean>
+              </action>
             </actions>
             <formComponents>
               <formComponent id="16" beanClass="com.install4j.runtime.beans.formcomponents.ProgressComponent">
@@ -516,9 +529,7 @@ return console.askYesNo(message, true);
     </styles>
   </installerGui>
   <mediaSets>
-    <unixInstaller name="Unix Installer" id="514" installDir=".kojo/extension/${compiler:sys.shortName}">
-      <jreBundle installOnlyIfNecessary="true" />
-    </unixInstaller>
+    <unixInstaller name="Unix Installer" id="514" installDir=".kojo/extension/${compiler:sys.shortName}" />
   </mediaSets>
   <buildIds buildAll="false">
     <mediaSet refId="514" />
