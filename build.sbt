@@ -1,7 +1,7 @@
 lazy val scalaVer = "2.13.6"
 name := "kojo-ai"
 
-version := "0.7.0"
+version := "0.7.1"
 
 scalaVersion := scalaVer
 
