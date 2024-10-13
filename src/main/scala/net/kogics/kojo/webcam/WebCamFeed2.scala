@@ -14,24 +14,34 @@
  */
 package net.kogics.kojo.webcam
 
-import org.bytedeco.javacv.FrameGrabber
-import org.bytedeco.javacv.Java2DFrameUtils
-import org.bytedeco.javacv.OpenCVFrameGrabber
-import org.bytedeco.opencv.opencv_core.Mat
+// This is an experimental WebCam Feed capture-er based on
+// an opencv videocapture vs a javacv framegrabber
+// This does not currently work in kojo-ai due to a missing native library
+// The idea with this is to have an exploration point available for video capture on the Mac,
+// which does not currently work with a javacv framegraber
 
-class WebCamFeed(device: Int, fps: Int) {
+import org.bytedeco.javacv.Java2DFrameUtils
+import org.bytedeco.javacv.OpenCVFrameConverter
+import org.bytedeco.opencv.opencv_core.Mat
+import org.opencv.core.{ Mat => OpenCvMat }
+import org.opencv.videoio.VideoCapture
+
+class WebCamFeed2(device: Int, fps: Int) {
   @volatile private var running = false
 
   def startCapture(frameHandler: Mat => Unit): Unit = {
     var lastFrameTime = System.currentTimeMillis()
     running = true
 
-    def detectFrameSequence(grabber: FrameGrabber): Unit = {
+    def detectFrameSequence(grabber: VideoCapture): Unit = {
       val delay = 1000.0 / fps
-      grabber.start()
+//      grabber.start()
       try {
-        var frame = grabber.grab()
-        while (frame != null && running) {
+        val frame0 = new OpenCvMat()
+        grabber.read(frame0)
+        val converter = new OpenCVFrameConverter.ToMat()
+        while (!frame0.empty() && running) {
+          val frame = converter.convert(frame0)
           val currTime = System.currentTimeMillis()
           if (currTime - lastFrameTime > delay) {
             val imageMat = Java2DFrameUtils.toMat(frame)
@@ -39,7 +49,7 @@ class WebCamFeed(device: Int, fps: Int) {
             lastFrameTime = currTime
             Thread.sleep(0)
           }
-          frame = grabber.grab()
+          grabber.read(frame0)
         }
       }
       catch {
@@ -47,11 +57,11 @@ class WebCamFeed(device: Int, fps: Int) {
       }
       finally {
         running = false
-        grabber.stop()
+        grabber.release()
       }
     }
 
-    val grabber = new OpenCVFrameGrabber(device)
+    val grabber = new VideoCapture(0)
     detectFrameSequence(grabber)
   }
 
