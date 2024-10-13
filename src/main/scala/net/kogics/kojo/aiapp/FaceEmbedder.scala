@@ -76,14 +76,12 @@ class FaceEmbedder(modelDir: String) {
   }
 
   def faceEmbedding(image: Mat): Array[Float] = {
-    import ai.djl.modality.cv.BufferedImageFactory
     import ai.djl.pytorch.jni.JniUtils
-
     JniUtils.setGraphExecutorOptimize(false)
     Using.Manager { use =>
       println("Calculating embedding")
       val src = Java2DFrameUtils.toBufferedImage(image)
-      val faceImage = new BufferedImageFactory().fromImage(src)
+      val faceImage = bufferedImageToDjlImage(src)
       println(s"Feeding into net, img(${faceImage.getWidth}, ${faceImage.getHeight})")
       val ret = faceFeaturePredictor.predict(faceImage)
       println("Done")
