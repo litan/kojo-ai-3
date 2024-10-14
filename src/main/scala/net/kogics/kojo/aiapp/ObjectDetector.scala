@@ -22,7 +22,6 @@ class ObjectDetector(modelDir: String) {
       "resize" -> Boolean.box(true),
       "rescale" -> Boolean.box(true),
       "optApplyRatio" -> Boolean.box(true),
-      "toTensor" -> Boolean.box(true),
       "threshold" -> Double.box(0.4),
     )
 
@@ -32,7 +31,7 @@ class ObjectDetector(modelDir: String) {
         .setTypes(classOf[Image], classOf[DetectedObjects])
         .optModelPath(Paths.get(modelDir))
         .optTranslatorFactory(new ai.djl.modality.cv.translator.YoloV5TranslatorFactory())
-//        .optArguments(args.asJava)
+        .optArguments(args.asJava)
         .build()
 
     val mdl = criteria.loadModel()
@@ -40,12 +39,11 @@ class ObjectDetector(modelDir: String) {
     (mdl, mdl.newPredictor())
   }
 
-  def findObjects(image: Mat): (DetectedObjects, BufferedImage) = {
+  def findObjects(imageMat: Mat): (DetectedObjects, BufferedImage) = {
     import ai.djl.pytorch.jni.JniUtils
     JniUtils.setGraphExecutorOptimize(false)
     Using.Manager { use =>
-      val src = Java2DFrameUtils.toBufferedImage(image)
-      val djlImage = bufferedImageToDjlImage(src)
+      val djlImage = matToDjlImage(imageMat)
       val detectedObjects = predictor.predict(djlImage)
       djlImage.drawBoundingBoxes(detectedObjects)
       (detectedObjects, djlImage.getWrappedImage.asInstanceOf[BufferedImage])

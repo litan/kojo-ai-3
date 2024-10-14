@@ -17,4 +17,7 @@ package object aiapp {
     Java2DFrameUtils.toBufferedImage(imageMat)
   }
 
+  def matToDjlImage(imageMat: Mat): Image = {
+    bufferedImageToDjlImage(matToBufferedImage(imageMat))
+  }
 }
